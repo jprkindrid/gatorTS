@@ -1,7 +1,6 @@
 import os from 'node:os'
 import path from 'node:path'
 import fs from 'node:fs'
-import { json } from 'node:stream/consumers'
 
 type Config = {
     dbUrl: string

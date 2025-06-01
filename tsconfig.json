@@ -7,6 +7,6 @@
     "strict": true,
     "moduleResolution": "Node"
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "src/lib/db/schema.ts"],
   "exclude": ["node_modules"]
 }

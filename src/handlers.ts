@@ -1,5 +1,6 @@
 import { setUser, readConfig } from "./config";
 import { getUser, createUser, resetUsers, getUsers } from "./lib/db/queries/users"
+import { fetchFeed } from "./rssfeeds";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
@@ -71,7 +72,7 @@ export async function handlerUsers(cmdName: string, ...args: string[]) {
     if (users.length ===  0) {
         throw new Error("no users in database")
     }
-    
+
     const config = readConfig()
     const currentUser = config.currentUserName
     for (const dbUser of users) {
@@ -81,4 +82,12 @@ export async function handlerUsers(cmdName: string, ...args: string[]) {
             console.log(`* ${dbUser.name}`)
         }
     }
+}
+
+export async function handlerAgg(cmdName: string, ...args: string[]) {
+    if (args.length !== 1) {
+        throw new Error(`usage: ${cmdName} URL`)
+    }
+    const feedURL = args[0]
+    await fetchFeed(feedURL);
 }

@@ -1,13 +1,13 @@
-import { setUser } from "./config";
-import { fetchUser, createUser, resetUsers } from "./lib/db/queries/users.js"
+import { setUser, readConfig } from "./config";
+import { getUser, createUser, resetUsers, getUsers } from "./lib/db/queries/users"
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
 export type CommandsRegistry = Record<string, CommandHandler>
 
-export async function registerCommand(registry: CommandsRegistry, cmdName: string, handler: CommandHandler) {
-    registry[cmdName] = handler
-}
+export function registerCommand(registry: CommandsRegistry, cmdName: string, handler: CommandHandler) {
+     registry[cmdName] = handler
+ }
 
 export async function runCommand(registry: CommandsRegistry, cmdName: string, ...args: string[]) {
     if (!(cmdName in registry)) {
@@ -23,7 +23,7 @@ export async function handlerLogin(cmdName:string, ...args: string[]) {
         throw new Error(`usage: ${cmdName} <name>`);
     }
     const userName = args[0]
-    const existingUser = await fetchUser(userName)
+    const existingUser = await getUser(userName)
         if (!existingUser) {
             throw new Error (`no registered user with name ${userName}`)
         }
@@ -34,12 +34,12 @@ export async function handlerLogin(cmdName:string, ...args: string[]) {
 
 
 export async function handlerRegister(cmdName: string, ...args: string[]) {
-        if (args.length !== 1) {
+    if (args.length !== 1) {
         throw new Error(`usage: ${cmdName} <name>`);
     }
     const userName = args[0]
     try {
-        const existingUser = await fetchUser(userName)
+        const existingUser = await getUser(userName)
         if (existingUser) {
             throw new Error (`user "${userName}" is already registered`)
         }
@@ -60,4 +60,25 @@ export async function handlerReset(cmdName: string, ...args: string[]) {
     }
     await resetUsers()
     console.log("Users reset successfully")
+}
+
+export async function handlerUsers(cmdName: string, ...args: string[]) {
+    if (args.length !== 0 ) {
+        throw new Error("users command does not take arguments")
+    }
+
+    const users = await getUsers();
+    if (users.length ===  0) {
+        throw new Error("no users in database")
+    }
+    
+    const config = readConfig()
+    const currentUser = config.currentUserName
+    for (const dbUser of users) {
+        if ( dbUser.name === currentUser) {
+            console.log(`* ${dbUser.name} (current)`)
+        } else {
+            console.log(`* ${dbUser.name}`)
+        }
+    }
 }

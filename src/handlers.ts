@@ -1,6 +1,6 @@
 import { setUser, readConfig } from "./config";
 import { getUser, createUser, resetUsers, getUsers } from "./lib/db/queries/users"
-import { fetchFeed } from "./rssfeeds";
+import { fetchFeed } from "./rss";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
 
@@ -85,9 +85,14 @@ export async function handlerUsers(cmdName: string, ...args: string[]) {
 }
 
 export async function handlerAgg(cmdName: string, ...args: string[]) {
-    if (args.length !== 1) {
-        throw new Error(`usage: ${cmdName} URL`)
+    // if (args.length !== 1) {
+    //     throw new Error(`usage: ${cmdName} URL`)
+    // }
+    let feedURL = args[0]
+    feedURL = "https://www.wagslane.dev/index.xml"
+    const result = await fetchFeed(feedURL);
+    console.log(result)
+    for (let item of result.channel.item) {
+        console.log(item)
     }
-    const feedURL = args[0]
-    await fetchFeed(feedURL);
 }

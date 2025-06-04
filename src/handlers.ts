@@ -1,8 +1,15 @@
 import { setUser, readConfig } from "./config";
 import { getUser, createUser, resetUsers, getUsers } from "./lib/db/queries/users"
-import { fetchFeed } from "./rss";
+import { User } from "./lib/db/schema";
 
 export type CommandHandler = (cmdName: string, ...args: string[]) => Promise<void>;
+
+export type UserCommandHandler = (
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) => Promise<void> | void;
+
 
 export type CommandsRegistry = Record<string, CommandHandler>
 

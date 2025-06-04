@@ -1,6 +1,6 @@
 import { fetchFeed } from "./rss";
 import { readConfig } from "./config";
-import { createFeed, getFeeds } from "./lib/db/queries/feeds";
+import { createFeed, createFeedFollow, getFeedByUrl, getFeedFollowsForUser, getFeeds } from "./lib/db/queries/feeds";
 import { getUser, getUserByID } from "./lib/db/queries/users";
 import { User, Feed } from "./lib/db/schema";
 
@@ -17,20 +17,18 @@ export async function handlerAgg(cmdName: string, ...args: string[]) {
     }
 }
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]) {
+export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]) {
     if (args.length !== 2) {
         throw new Error(`usage: ${cmdName} <feed_name> <url>`);
     }
-    const config = readConfig();
-    const userName = config.currentUserName;
     const feedName = args[0];
     const feedUrl = args[1];
     
     try {
-        const dbUser: User = await getUser(userName)
-        const userID = dbUser.id
+        const userID = user.id
         const dbFeed: Feed = await createFeed(feedName, feedUrl, userID)
-        printFeed(dbFeed, dbUser)
+        await createFeedFollow(feedUrl)
+        printFeed(dbFeed, user)
 
 
     } catch (err) {
@@ -42,15 +40,14 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]) {
 }
 
 
-export async function handlerFeeds(cmdname: string, ...args: string[]) {
+export async function handlerFeeds(cmdName: string,user: User, ...args: string[]) {
     if (args.length !== 0 ) {
-        throw new Error("feeds command does not take arguments")
+        throw new Error(`${cmdName} command does not take arguments`)
     }
 
     try {
         const feeds: Feed[] = await getFeeds();
         for (const feed of feeds) {
-            const user: User = await getUserByID(feed.userId);
             printFeed(feed, user)
         }
         
@@ -71,4 +68,56 @@ function printFeed(feed: Feed, user: User) {
   console.log(`* User:          ${user.name}`);
   console.log(`------------------------------`)
 }
+
+export function printFeedFollow(username: string, feedname: string) {
+  console.log(`* User:          ${username}`);
+  console.log(`* Feed:          ${feedname}`);
+}
+
+export async function handlerFollow(cmdName: string, user: User, ...args: string[]) {
+    if (args.length !== 1) {
+        throw new Error(`usage: ${cmdName} <url>`)
+    }
+    const url = args[0]
+    const feed = await getFeedByUrl(url)
+    if (!feed) {
+    throw new Error(`Feed not found: ${url}`);
+     }
+    try {
+        const newFeedFollow = await createFeedFollow(url)
+        console.log("Feed Followed:")
+        printFeedFollow(user.name, feed.url)
+
+    } catch (err) {
+        if (err instanceof Error) {
+            throw new Error(`Error fetching feeds: ${err.message}`)
+        }
+        throw new Error(`Error fetching feeds: ${String(err)}`)
+    }
+}
+
+export async function handlerFollowing(cmdName: string, user: User, ...args: string[]) {
+    if (args.length !== 0 ) {
+        throw new Error(`${cmdName} command does not take arguments`)
+    }
+
+    try {
+        const follows= await getFeedFollowsForUser(user.name);
+        if (follows.length === 0) {
+        console.log(`No feed follows found for this user.`);
+        return;
+    }
+        console.log(`${user.name} is following:`)
+        for (let follow of follows) {
+            console.log(follow.feeds.name)
+        }
+
+    } catch (err) {
+        if (err instanceof Error) {
+            throw new Error(`Error fetching feeds: ${err.message}`)
+        }
+        throw new Error(`Error fetching feeds: ${String(err)}`)
+    }
+}
+
 

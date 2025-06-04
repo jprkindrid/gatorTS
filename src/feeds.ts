@@ -1,6 +1,6 @@
 import { fetchFeed } from "./rss";
 import { readConfig } from "./config";
-import { createFeed, createFeedFollow, getFeedByUrl, getFeedFollowsForUser, getFeeds } from "./lib/db/queries/feeds";
+import { createFeed, createFeedFollow, getFeedByUrl, getFeedFollowsForUser, getFeeds, removeFollowForUser } from "./lib/db/queries/feeds";
 import { getUser, getUserByID } from "./lib/db/queries/users";
 import { User, Feed } from "./lib/db/schema";
 
@@ -78,11 +78,14 @@ export async function handlerFollow(cmdName: string, user: User, ...args: string
     if (args.length !== 1) {
         throw new Error(`usage: ${cmdName} <url>`)
     }
+
     const url = args[0]
     const feed = await getFeedByUrl(url)
+
     if (!feed) {
     throw new Error(`Feed not found: ${url}`);
-     }
+    }
+    
     try {
         const newFeedFollow = await createFeedFollow(url)
         console.log("Feed Followed:")
@@ -94,6 +97,25 @@ export async function handlerFollow(cmdName: string, user: User, ...args: string
         }
         throw new Error(`Error fetching feeds: ${String(err)}`)
     }
+}
+
+export async function handlerUnfollow(cmdName: string, user: User, ...args: string[]) {
+    if (args.length !== 1) {
+        throw new Error(`usage: ${cmdName} <url>`)
+    }
+
+    const url = args[0]
+
+    try {
+        const feed = await getFeedByUrl(url)
+        await removeFollowForUser(user, feed)
+
+    } catch (err) {
+        if (err instanceof Error) {
+            throw new Error(`Error fetching feeds: ${err.message}`)
+        }
+        throw new Error(`Error fetching feeds: ${String(err)}`)
+    }   
 }
 
 export async function handlerFollowing(cmdName: string, user: User, ...args: string[]) {
@@ -119,5 +141,3 @@ export async function handlerFollowing(cmdName: string, user: User, ...args: str
         throw new Error(`Error fetching feeds: ${String(err)}`)
     }
 }
-
-

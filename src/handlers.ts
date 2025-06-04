@@ -32,29 +32,6 @@ export async function handlerLogin(cmdName:string, ...args: string[]) {
     console.log(`User has been set to ${userName}`)
 }
 
-
-
-export async function handlerRegister(cmdName: string, ...args: string[]) {
-    if (args.length !== 1) {
-        throw new Error(`usage: ${cmdName} <name>`);
-    }
-    const userName = args[0]
-    try {
-        const existingUser = await getUser(userName)
-        if (existingUser) {
-            throw new Error (`user "${userName}" is already registered`)
-        }
-        await createUser(userName)
-        setUser(userName)
-        console.log(`User "${userName}" has been created`)
-    } catch(err) {
-        if (err instanceof Error) {
-            throw new Error(`Error registering user ${userName}: ${err.message}`)
-        }
-        throw new Error(`Error registering user ${userName}: ${String(err)}`)
-    }
-}
-
 export async function handlerReset(cmdName: string, ...args: string[]) {
     if (args.length !== 0 ) {
         throw new Error("reset command does not take arguments")
@@ -63,36 +40,4 @@ export async function handlerReset(cmdName: string, ...args: string[]) {
     console.log("Users reset successfully")
 }
 
-export async function handlerUsers(cmdName: string, ...args: string[]) {
-    if (args.length !== 0 ) {
-        throw new Error("users command does not take arguments")
-    }
 
-    const users = await getUsers();
-    if (users.length ===  0) {
-        throw new Error("no users in database")
-    }
-
-    const config = readConfig()
-    const currentUser = config.currentUserName
-    for (const dbUser of users) {
-        if ( dbUser.name === currentUser) {
-            console.log(`* ${dbUser.name} (current)`)
-        } else {
-            console.log(`* ${dbUser.name}`)
-        }
-    }
-}
-
-export async function handlerAgg(cmdName: string, ...args: string[]) {
-    // if (args.length !== 1) {
-    //     throw new Error(`usage: ${cmdName} URL`)
-    // }
-    let feedURL = args[0]
-    feedURL = "https://www.wagslane.dev/index.xml"
-    const result = await fetchFeed(feedURL);
-    console.log(result)
-    for (let item of result.channel.item) {
-        console.log(item)
-    }
-}

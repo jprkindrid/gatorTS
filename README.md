@@ -1,6 +1,7 @@
 # gatorTS
 
 A TypeScript-based CLI tool for managing and browsing RSS feeds and posts.
+From the [boot.dev course](https://www.boot.dev/courses/build-blog-aggregator-typescript)
 
 ## Requirements
 - Node.js (v18 or newer recommended)

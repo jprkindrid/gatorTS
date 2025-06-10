@@ -5,8 +5,9 @@ import { CommandsRegistry,
   handlerReset, } from "./handlers.js";
 
 import { handlerUsers, handlerRegister } from "./users.js";
-import { handlerAddFeed, handlerAgg, handlerFeeds, handlerFollow, handlerFollowing, handlerUnfollow } from "./feeds.js";
+import { handlerAddFeed, handlerFeeds, handlerFollow, handlerFollowing, handlerUnfollow } from "./feeds.js";
 import { middlewareLoggedIn } from "./middleware.js";
+import { handlerAgg } from "./aggregate.js";
 
 
 

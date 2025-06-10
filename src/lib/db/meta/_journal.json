@@ -15,6 +15,13 @@
       "when": 1749057919155,
       "tag": "0001_watery_sasquatch",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749578726694,
+      "tag": "0002_old_king_bedlam",
+      "breakpoints": true
     }
   ]
 }

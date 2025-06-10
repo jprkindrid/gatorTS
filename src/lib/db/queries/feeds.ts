@@ -1,7 +1,7 @@
 import { db } from ".."
 import { feedFollows, feeds, users } from "../schema"
-import { eq, and } from "drizzle-orm";
-import { getUser, getUserByID } from "./users";
+import { eq, and, sql } from "drizzle-orm";
+import { getUser } from "./users";
 import { readConfig } from "../../../config";
 import { User, Feed } from "../schema";
 
@@ -64,4 +64,21 @@ export async function removeFollowForUser(user: User, feed: Feed) {
     eq(feedFollows.feedId, feed.id),
     eq(feedFollows.userId, user.id)
   ))
+}
+
+export async function markFeedFetched(feedID: string) {
+  const now = new Date();
+  await db.update(feeds)
+  .set({ 
+    updatedAt: now,
+    lastFetchedAt: now,
+  })
+  .where(eq(feeds.id, feedID));
+}
+
+export async function getNextFeedToFetch() {
+  const [feedsToCheck]= await db.select().from(feeds)
+    .orderBy(sql `${feeds.lastFetchedAt} asc nulls first`)
+    .limit(1) 
+  return feedsToCheck
 }

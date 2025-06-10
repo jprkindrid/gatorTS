@@ -4,18 +4,7 @@ import { createFeed, createFeedFollow, getFeedByUrl, getFeedFollowsForUser, getF
 import { getUser, getUserByID } from "./lib/db/queries/users";
 import { User, Feed } from "./lib/db/schema";
 
-export async function handlerAgg(cmdName: string, ...args: string[]) {
-    // if (args.length !== 1) {
-    //     throw new Error(`usage: ${cmdName} URL`)
-    // }
-    let feedURL = args[0]
-    feedURL = "https://www.wagslane.dev/index.xml"
-    const result = await fetchFeed(feedURL);
-    console.log(result)
-    for (let item of result.channel.item) {
-        console.log(item)
-    }
-}
+
 
 export async function handlerAddFeed(cmdName: string, user: User, ...args: string[]) {
     if (args.length !== 2) {

@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import { db } from ".."
 import { users } from "../schema"
 import { eq } from "drizzle-orm"
